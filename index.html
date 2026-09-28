@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Nhạc TikTok">
-  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f380.png">
+  <link rel="apple-touch-icon" href="https://github.com/duxng000000000000000000/Musicbaby/blob/main/IMG_20260928_224327_886.jpg?raw=true">
 
   <!-- FONT CHỮ PIXEL RETRO Y2K -->
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -624,11 +624,18 @@
 
       // CẤU HÌNH MEDIASESSION DÀNH CHO MÀN HÌNH KHÓA IOS
       if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: song.title,
-          artist: song.author,
-          artwork: [{ src: song.cover, sizes: '512x512', type: 'image/jpeg' }]
-        });
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: song.title,
+    artist: song.author,
+    // 👉 THAY ĐƯỜNG DẪN ẢNH CỦA BẠN VÀO BÊN DƯỚI:
+    artwork: [
+      { 
+        src: 'https://github.com/duxng000000000000000000/Musicbaby/blob/main/IMG_20260928_224327_886.jpg?raw=true', 
+        sizes: '512x512', 
+        type: 'image/jpeg' 
+      }
+    ]
+  });
 
         navigator.mediaSession.setActionHandler('play', () => audio.play());
         navigator.mediaSession.setActionHandler('pause', () => audio.pause());
