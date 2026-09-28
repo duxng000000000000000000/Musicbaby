@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Trình Phát Nhạc TikTok Pixel Pink</title>
+
+  <!-- CẤU HÌNH PWA DÀNH CHO IOS SAFARI (Full Màn Hình Native) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nhạc TikTok">
+  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f380.png">
+
+  <!-- FONT CHỮ PIXEL RETRO Y2K -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      image-rendering: pixelated;
+    }
+
+    body {
+      font-family: 'VT323', monospace;
+      background-color: #ffd1dc;
+      background-image: 
+        radial-gradient(#ffb6c1 2px, transparent 2px),
+        radial-gradient(#ffb6c1 2px, #ffd1dc 2px);
+      background-size: 20px 20px;
+      background-position: 0 0, 10px 10px;
+      color: #8b263e;
+      margin: 0;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      font-size: 18px;
+    }
+
+    /* TIÊU ĐỀ Y2K */
+    .app-title {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 14px;
+      color: #ff3366;
+      text-shadow: 2px 2px 0px #fff, 4px 4px 0px #ff99bb;
+      margin: 10px 0 14px 0;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* KHUNG PIXEL TỔNG THỂ */
+    .pixel-box {
+      background: #fff0f5;
+      border: 4px solid #ff6699;
+      box-shadow: 
+        inset -4px -4px 0px #ffb6c1,
+        inset 4px 4px 0px #ffffff,
+        5px 5px 0px #8b263e;
+      border-radius: 12px;
+      padding: 14px;
+      width: 100%;
+      max-width: 380px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .pixel-header {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      background: #ff6699;
+      color: white;
+      padding: 6px 10px;
+      margin: -14px -14px 12px -14px;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* INPUT VÀ NÚT BẤM PIXEL */
+    input[type="text"] {
+      width: 100%;
+      padding: 8px 10px;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      border: 3px solid #ff99bb;
+      background: #fff;
+      color: #8b263e;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      outline: none;
+      box-shadow: inset 2px 2px 0px #ffd1dc;
+    }
+
+    .btn {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 9px;
+      padding: 10px;
+      width: 100%;
+      background: #ff6699;
+      color: #fff;
+      border: 3px solid #8b263e;
+      box-shadow: 0 4px 0 #8b263e;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.1s ease;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn:active {
+      box-shadow: 0 0 0 #8b263e;
+      transform: translateY(4px);
+    }
+
+    .btn-secondary {
+      background: #ffb6c1;
+      color: #8b263e;
+      font-size: 8px;
+      padding: 8px 4px;
+    }
+
+    .btn-active {
+      background: #ff0055 !important;
+      color: #fff !important;
+      border-color: #5a001a !important;
+    }
+
+    .btn-danger {
+      background: #ff4d4d;
+      color: white;
+      border: 2px solid #800000;
+      padding: 4px 6px;
+      font-size: 10px;
+      box-shadow: 0 2px 0 #800000;
+      border-radius: 6px;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    /* MÀN HÌNH PLAYER & ĐĨA NHẠC XOAY */
+    .player-screen {
+      background: #ffe6ee;
+      border: 3px dashed #ff80ab;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .album-art-box {
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 10px auto;
+      border: 3px solid #ff6699;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #ffcdd2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 4px #ffe6ee, 0 0 0 7px #ff80ab;
+      animation: rotateDisc 10s linear infinite;
+      animation-play-state: paused;
+    }
+
+    .album-art-box.playing {
+      animation-play-state: running;
+    }
+
+    .album-art-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @keyframes rotateDisc {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .song-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #d81b60;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .song-artist {
+      font-size: 18px;
+      color: #ff4081;
+    }
+
+    /* THANH TIẾN TRÌNH THỜI GIAN */
+    .progress-container {
+      margin: 8px 0;
+    }
+
+    .time-display {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      color: #8b263e;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #ff3366;
+      cursor: pointer;
+    }
+
+    /* BỘ ĐIỀU KHIỂN NHẠC (CONTROLS) */
+    .control-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 10px;
+      gap: 6px;
+    }
+
+    .btn-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      padding: 0;
+      font-size: 12px;
+    }
+
+    .btn-main {
+      width: 52px;
+      height: 52px;
+      font-size: 14px;
+      background: #ff3366;
+    }
+
+    /* DANH SÁCH BÀI HÁT OFFLINE (PLAYLIST) */
+    .playlist {
+      max-height: 180px;
+      overflow-y: auto;
+      margin-top: 6px;
+    }
+
+    .playlist-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: #fff;
+      border: 2px solid #ffb6c1;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+
+    .playlist-item.active {
+      background: #ffe6ee;
+      border-color: #ff3366;
+      font-weight: bold;
+    }
+
+    .playlist-item-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 70%;
+      overflow: hidden;
+    }
+
+    .playlist-item-title {
+      font-size: 18px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-text {
+      font-size: 16px;
+      color: #ff0055;
+      text-align: center;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TIÊU ĐỀ TRANG WEB -->
+  <div class="app-title">
+    🌸 TIKTOK MUSIC 🌸<br>
+    <span style="font-size: 9px; color: #ff6699;">♥ PIXEL PINK PLAYER ♥</span>
+  </div>
+
+  <!-- 1. TẢI NHẠC TIKTOK -->
+  <div class="pixel-box">
+    <div class="pixel-header">
+      <span>TẢI NHẠC TIKTOK</span>
+      <span>🎀</span>
+    </div>
+    <input type="text" id="tiktokUrl" placeholder="Dán link TikTok vào đây nha...">
+    <button class="btn" onclick="fetchTikTokAudio()">✨ TẢI & THÊM VÀO PLAYLIST ✨</button>
+  </div>
+
+  <!-- 2. TRÌNH PHÁT NHẠC CHUẨN APP -->
+  <div class="pixel-box">
+    <div class="pixel-header">
+      <span>TRÌNH PHÁT NHẠC</span>
+      <span>🎵</span>
+    </div>
+    
+    <div class="player-screen">
+      <div class="album-art-box" id="discBox">
+        <img id="coverImg" src="https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f38a.png" alt="Cover">
+      </div>
+      <div id="songTitle" class="song-title">Chưa Chọn Bài Hát</div>
+      <div id="songArtist" class="song-artist">TikTok Music</div>
+    </div>
+
+    <!-- THANH TIẾN TRÌNH PHÁT NHẠC -->
+    <div class="progress-container">
+      <input type="range" id="progressBar" value="0" min="0" max="100" oninput="seekAudio(this.value)">
+      <div class="time-display">
+        <span id="currentTime">00:00</span>
+        <span id="durationTime">00:00</span>
+      </div>
+    </div>
+
+    <!-- NÚT ĐIỀU KHIỂN BÀI HÁT -->
+    <div class="control-row">
+      <!-- TRỘN BÀI (SHUFFLE) -->
+      <button id="btnShuffle" class="btn btn-secondary btn-circle" onclick="toggleShuffle()" title="Trộn bài">🔀</button>
+      
+      <!-- BÀI TRƯỚC (PREVIOUS) -->
+      <button class="btn btn-secondary btn-circle" onclick="playPrev()" title="Bài trước">⏮</button>
+      
+      <!-- PHÁT / TẠM DỪNG (PLAY/PAUSE) -->
+      <button id="btnPlayPause" class="btn btn-circle btn-main" onclick="togglePlayPause()" title="Phát/Tạm dừng">▶</button>
+      
+      <!-- BÀI TIẾP (NEXT) -->
+      <button class="btn btn-secondary btn-circle" onclick="playNext()" title="Bài tiếp">⏭</button>
+      
+      <!-- LẶP LẠI (REPEAT: OFF / ONE / ALL) -->
+      <button id="btnRepeat" class="btn btn-secondary btn-circle" onclick="toggleRepeat()" title="Lặp lại">🔁</button>
+    </div>
+
+    <!-- THẺ AUDIO CHẠY NỀN IOS -->
+    <audio id="audioPlayer" preload="metadata" playsinline></audio>
+  </div>
+
+  <!-- 3. HẸN GIỜ TẮT NHẠC -->
+  <div class="pixel-box">
+    <div class="pixel-header">
+      <span>HẸN GIỜ TẮT NHẠC</span>
+      <span>⏰</span>
+    </div>
+    <div class="btn-grid">
+      <button class="btn btn-secondary" onclick="setSleepTimer(15)">15 PHÚT</button>
+      <button class="btn btn-secondary" onclick="setSleepTimer(30)">30 PHÚT</button>
+      <button class="btn btn-secondary" onclick="setSleepTimer(60)">60 PHÚT</button>
+    </div>
+    <div id="timerStatus" class="status-text"></div>
+  </div>
+
+  <!-- 4. DANH SÁCH LƯU OFFLINE (PLAYLIST) -->
+  <div class="pixel-box">
+    <div class="pixel-header">
+      <span>DANH SÁCH PLAYLIST</span>
+      <span>💾</span>
+    </div>
+    <div id="playlist" class="playlist"></div>
+  </div>
+
+  <script>
+    const audio = document.getElementById('audioPlayer');
+    const discBox = document.getElementById('discBox');
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const btnShuffle = document.getElementById('btnShuffle');
+    const btnRepeat = document.getElementById('btnRepeat');
+    const progressBar = document.getElementById('progressBar');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationTimeEl = document.getElementById('durationTime');
+
+    let db = null;
+    let playlistSongs = [];
+    let currentIndex = -1;
+    let isShuffle = false;
+    let repeatMode = 0; // 0: Off, 1: Repeat One, 2: Repeat All
+    let sleepTimer = null;
+
+    // --- KẾT NỐI INDEXEDDB LƯU NHẠC OFFLINE ---
+    const request = indexedDB.open("TikTokPinkMusicDB_V2", 1);
+    request.onupgradeneeded = (e) => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains("songs")) {
+        db.createObjectStore("songs", { keyPath: "id", autoIncrement: true });
+      }
+    };
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      loadSavedSongs();
+    };
+
+    // --- XỬ LÝ AUDIO VÀ TIẾN TRÌNH ---
+    audio.ontimeupdate = () => {
+      if (audio.duration) {
+        const pct = (audio.currentTime / audio.duration) * 100;
+        progressBar.value = pct;
+        currentTimeEl.innerText = formatTime(audio.currentTime);
+        durationTimeEl.innerText = formatTime(audio.duration);
+      }
+    };
+
+    audio.onplay = () => {
+      discBox.classList.add('playing');
+      btnPlayPause.innerText = '⏸';
+    };
+
+    audio.onpause = () => {
+      discBox.classList.remove('playing');
+      btnPlayPause.innerText = '▶';
+    };
+
+    // TỰ ĐỘNG CHUYỂN BÀI KHẢI HẾT BÀI
+    audio.onended = () => {
+      if (repeatMode === 1) { // Repeat One
+        audio.currentTime = 0;
+        audio.play();
+      } else {
+        playNext();
+      }
+    };
+
+    function togglePlayPause() {
+      if (currentIndex === -1 && playlistSongs.length > 0) {
+        playSongAtIndex(0);
+        return;
+      }
+      if (!audio.src) return;
+      if (audio.paused) {
+        audio.play();
+      } else {
+        audio.pause();
+      }
+    }
+
+    function seekAudio(val) {
+      if (audio.duration) {
+        audio.currentTime = (val / 100) * audio.duration;
+      }
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // --- ĐIỀU KHIỂN TRỘN BÀI & LẶP LẠI ---
+    function toggleShuffle() {
+      isShuffle = !isShuffle;
+      btnShuffle.classList.toggle('btn-active', isShuffle);
+    }
+
+    function toggleRepeat() {
+      repeatMode = (repeatMode + 1) % 3;
+      if (repeatMode === 0) {
+        btnRepeat.innerText = '🔁';
+        btnRepeat.classList.remove('btn-active');
+      } else if (repeatMode === 1) {
+        btnRepeat.innerText = '🔂'; // Repeat One
+        btnRepeat.classList.add('btn-active');
+      } else if (repeatMode === 2) {
+        btnRepeat.innerText = '🔁'; // Repeat All
+        btnRepeat.classList.add('btn-active');
+      }
+    }
+
+    function playNext() {
+      if (playlistSongs.length === 0) return;
+      if (isShuffle) {
+        let randIndex = Math.floor(Math.random() * playlistSongs.length);
+        playSongAtIndex(randIndex);
+      } else {
+        if (currentIndex < playlistSongs.length - 1) {
+          playSongAtIndex(currentIndex + 1);
+        } else if (repeatMode === 2) { // Repeat All
+          playSongAtIndex(0);
+        }
+      }
+    }
+
+    function playPrev() {
+      if (playlistSongs.length === 0) return;
+      if (currentIndex > 0) {
+        playSongAtIndex(currentIndex - 1);
+      } else {
+        playSongAtIndex(playlistSongs.length - 1);
+      }
+    }
+
+    // --- TẢI NHẠC TỪ TIKTOK ---
+    async function fetchTikTokAudio() {
+      const url = document.getElementById('tiktokUrl').value;
+      if (!url) return alert('Bé ơi, dán link TikTok vào đã nhé!');
+
+      document.getElementById('songTitle').innerText = 'Đang tải nhạc nè...';
+
+      try {
+        const response = await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`);
+        const data = await response.json();
+
+        if (data.code === 0) {
+          const audioUrl = data.data.music;
+          const title = data.data.title || 'TikTok Audio Cute';
+          const author = data.data.author.nickname || 'TikToker';
+          const cover = data.data.cover || 'https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f38a.png';
+
+          saveSongToOffline(title, author, cover, audioUrl);
+          document.getElementById('tiktokUrl').value = '';
+        } else {
+          alert('Không lấy được nhạc từ link này rồi!');
+          document.getElementById('songTitle').innerText = 'Chưa Chọn Bài Hát';
+        }
+      } catch (err) {
+        alert('Lỗi kết nối API rồi nha!');
+        document.getElementById('songTitle').innerText = 'Chưa Chọn Bài Hát';
+      }
+    }
+
+    // --- LƯU VÀ XÓA BÀI HÁT TẠI INDEXEDDB ---
+    async function saveSongToOffline(title, author, cover, audioUrl) {
+      try {
+        const res = await fetch(audioUrl);
+        const blob = await res.blob();
+
+        const tx = db.transaction("songs", "readwrite");
+        const store = tx.objectStore("songs");
+        store.add({ title, author, cover, blob });
+
+        tx.oncomplete = () => {
+          loadSavedSongs((newSongs) => {
+            playSongAtIndex(newSongs.length - 1);
+          });
+        };
+      } catch (e) {
+        alert("Không thể lưu bài hát offline.");
+      }
+    }
+
+    function deleteSong(id, e) {
+      e.stopPropagation(); // Ngăn phát bài khi bấm xóa
+      if (!confirm('Bé có muốn xóa bài hát này khỏi Playlist không?')) return;
+
+      const tx = db.transaction("songs", "readwrite");
+      const store = tx.objectStore("songs");
+      store.delete(id);
+
+      tx.oncomplete = () => {
+        loadSavedSongs();
+      };
+    }
+
+    function loadSavedSongs(callback) {
+      if (!db) return;
+      const tx = db.transaction("songs", "readonly");
+      const store = tx.objectStore("songs");
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        playlistSongs = request.result;
+        renderPlaylist();
+        if (callback) callback(playlistSongs);
+      };
+    }
+
+    function renderPlaylist() {
+      const playlistEl = document.getElementById('playlist');
+      playlistEl.innerHTML = '';
+
+      if (playlistSongs.length === 0) {
+        playlistEl.innerHTML = '<div class="status-text">Chưa có bài hát nào trong Playlist ~</div>';
+        return;
+      }
+
+      playlistSongs.forEach((song, index) => {
+        const item = document.createElement('div');
+        item.className = `playlist-item ${index === currentIndex ? 'active' : ''}`;
+        item.onclick = () => playSongAtIndex(index);
+        item.innerHTML = `
+          <div class="playlist-item-info">
+            <span>🌸</span>
+            <div class="playlist-item-title">${song.title}</div>
+          </div>
+          <button class="btn-danger" onclick="deleteSong(${song.id}, event)">🗑️</button>
+        `;
+        playlistEl.appendChild(item);
+      });
+    }
+
+    function playSongAtIndex(index) {
+      if (index < 0 || index >= playlistSongs.length) return;
+      currentIndex = index;
+      renderPlaylist();
+
+      const song = playlistSongs[index];
+      const blobUrl = URL.createObjectURL(song.blob);
+
+      audio.src = blobUrl;
+      document.getElementById('songTitle').innerText = song.title;
+      document.getElementById('songArtist').innerText = song.author;
+      document.getElementById('coverImg').src = song.cover;
+
+      audio.play();
+
+      // CẤU HÌNH MEDIASESSION DÀNH CHO MÀN HÌNH KHÓA IOS
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: song.title,
+          artist: song.author,
+          artwork: [{ src: song.cover, sizes: '512x512', type: 'image/jpeg' }]
+        });
+
+        navigator.mediaSession.setActionHandler('play', () => audio.play());
+        navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+        navigator.mediaSession.setActionHandler('previoustrack', () => playPrev());
+        navigator.mediaSession.setActionHandler('nexttrack', () => playNext());
+      }
+    }
+
+    // NỐI TÍNH NĂNG CHẠY NỀN TRÊN IOS SAFARI
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && !audio.paused) {
+        audio.play();
+      }
+    });
+
+    // --- HẸN GIỜ TẮT NHẠC (FADE-OUT) ---
+    function setSleepTimer(minutes) {
+      if (sleepTimer) clearTimeout(sleepTimer);
+
+      const ms = minutes * 60 * 1000;
+      document.getElementById('timerStatus').innerText = `Nhạc sẽ tự tắt sau ${minutes} phút nè! 💕`;
+
+      sleepTimer = setTimeout(() => {
+        let fadeAudio = setInterval(() => {
+          if (audio.volume > 0.1) {
+            audio.volume -= 0.1;
+          } else {
+            clearInterval(fadeAudio);
+            audio.pause();
+            audio.volume = 1.0;
+            document.getElementById('timerStatus').innerText = 'Đã tắt nhạc theo hẹn giờ rồi nha! 😴';
+          }
+        }, 300);
+      }, ms);
+    }
+  </script>
+</body>
+</html>
